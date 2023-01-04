@@ -4,6 +4,7 @@ from deepface import DeepFace
 from deepface.detectors import FaceDetector
 import cv2
 import uuid
+import os
 
 from io import BytesIO
 from PIL import Image
@@ -18,50 +19,49 @@ CORS(app)
 def index():
     return "Success"
 
+# @app.route('/detect', methods=["POST"])
+# def detect():
 
-@app.route('/detect', methods=["POST"])
-def detect():
+#     try:
 
-    try:
+#         resp_obj = jsonify({'success': False})
+#         req = request.get_json()
+#         #detector_name = "retinaface"
+#         detector_name = "opencv"
 
-        resp_obj = jsonify({'success': False})
-        req = request.get_json()
-        #detector_name = "retinaface"
-        detector_name = "opencv"
+#         # get raw data
+#         if "img" in list(req.keys()):
+#             # Get base64 encoded string from request object
+#             raw_content = req["img"]
+#             # decode the base 64 string
+#             decoded_string = base64.b64decode(raw_content[22:])
+#             guid = uuid.uuid4()
 
-        # get raw data
-        if "img" in list(req.keys()):
-            # Get base64 encoded string from request object
-            raw_content = req["img"]
-            # decode the base 64 string
-            decoded_string = base64.b64decode(raw_content[22:])
-            guid = uuid.uuid4()
+#             filepath = "temp_data\\"+str(guid)+".jpg"
 
-            filepath = "temp_data\\"+str(guid)+".jpg"
+#             with open(filepath, "wb") as f:
+#                 f.write(decoded_string)
 
-            with open(filepath, "wb") as f:
-                f.write(decoded_string)
+#             image = cv2.imread(filepath)
+#             # create a file object in local memory rather than disk to prevent having to to save image.
+#             #image_object = BytesIO(decoded_string)
+#             # open the image
+#             # image.show()
 
-            image = cv2.imread(filepath)
-            # create a file object in local memory rather than disk to prevent having to to save image.
-            #image_object = BytesIO(decoded_string)
-            # open the image
-            # image.show()
+#             detector = FaceDetector.build_model(detector_name)
+#             object = FaceDetector.detect_face(
+#                 detector, detector_name, image, align=True)
 
-            detector = FaceDetector.build_model(detector_name)
-            object = FaceDetector.detect_face(
-                detector, detector_name, image, align=True)
+#             print(len(obj))
 
-            print(len(obj))
+#             if (len(obj) == 1):
+#                 return jsonify({'success': 'True', 'FaceDetected': 'True'})
+#             else:
+#                 return jsonify({'success': 'True', 'FaceDetected': 'False'})
 
-            if (len(obj) == 1):
-                return jsonify({'success': 'True', 'FaceDetected': 'True'})
-            else:
-                return jsonify({'success': 'True', 'FaceDetected': 'False'})
-
-    except Exception as e:
-        print(e)
-        return jsonify({'success': 'False', 'Error': "error"})
+#     except Exception as e:
+#         print(e)
+#         return jsonify({'success': 'False', 'Error': "error"})
 
 
 @app.route('/detect2', methods=["POST"])
@@ -97,9 +97,19 @@ def detect_2():
                                            enforce_detection=True
                                            )
 
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+                    print("file deleted")
+
                 return jsonify({'success': 'True', 'FaceDetected': 'True'})
 
             except Exception as e:
+
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+
+                    print("file deleted")
+
                 print(e)
                 return jsonify({'success': 'True', 'FaceDetected': 'False'})
 
@@ -109,7 +119,7 @@ def detect_2():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5005)
 
 
 #    if 'image' not in request.files:
